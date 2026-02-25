@@ -1,8 +1,8 @@
-import React, { useRef, useEffect, useState } from "react";
-import type { Lane } from "../models/Lane";
+import React, {useRef, useEffect, useState} from "react";
+import type {Lane} from "../models/Lane";
 import LanePianoRoll from './LanePianoRoll.tsx';
 import LaneList from './LaneList';
-import { NOTE_HEIGHT, MIN_MIDI, MAX_MIDI } from "../engine/pianoConfig";
+import {NOTE_HEIGHT, MIN_MIDI, MAX_MIDI} from "../engine/pianoConfig";
 
 interface Props {
     lanes: Lane[];
@@ -11,6 +11,8 @@ interface Props {
 
 
 const LANE_HEIGHT = 300;
+const PIANO_HEIGHT =
+    (MAX_MIDI - MIN_MIDI) * NOTE_HEIGHT;
 // const MIN_SCALE = 50;
 // const MAX_SCALE = 1000;
 
@@ -18,8 +20,7 @@ const SNAP_DIVISION = 0.25; // 250ms grid
 const SNAP_PIXELS = 8;
 
 
-
-export default function TimelineCanvas({ lanes, setLanes }: Props) {
+export default function TimelineCanvas({lanes, setLanes}: Props) {
 
     const canvasRef = useRef<HTMLCanvasElement>(null);
     const containerRef = useRef<HTMLDivElement>(null);
@@ -362,7 +363,7 @@ export default function TimelineCanvas({ lanes, setLanes }: Props) {
         );
 
         canvas.width = width;
-        canvas.height = lanes.length * LANE_HEIGHT;
+        canvas.height = lanes.length * PIANO_HEIGHT;
 
         ctx.fillStyle = "#181818";
         ctx.fillRect(0, 0, canvas.width, canvas.height);
@@ -509,37 +510,32 @@ export default function TimelineCanvas({ lanes, setLanes }: Props) {
                         </div>
                         <div
                             style={{
-                                width: 80,
-                                background: "#181818",
-                                borderRight: "1px solid #333",
+                                display: "flex",
+                                height: 200, // visible lane height
+                                borderBottom: "1px solid #222",
                                 overflow: "hidden",
-                                position: "relative",
-                                overflowY: "scroll",
-                                scrollbarWidth: "none",   // Firefox
-                                msOverflowStyle: "none",  // IE/Edge
-                            }}
-                        >
-                            <LanePianoRoll />
-                        </div>
+                                position: "relative"
+                            }}>
+                            <div
+                                style={{ width: 65 }}
+                            >
+                                <LanePianoRoll/>
+                            </div>
 
 
+                            {/* Timeline Section */}
+                            <div
+                                style={{ flex: 1 }}
+                            >
 
-                        {/* Timeline Section */}
-                        <div
-                            style={{
-                                flex: 1,
-                                overflowX: "auto",
-                                overflowY: "hidden"
-                            }}
-                        >
-
-                            <canvas
-                                ref={laneIndex === 0 ? canvasRef : null}
-                                onMouseDown={handleMouseDown}
-                                onMouseMove={handleMouseMove}
-                                onMouseUp={handleMouseUp}
-                                style={{ display: "block" }}
-                            />
+                                <canvas
+                                    ref={laneIndex === 0 ? canvasRef : null}
+                                    onMouseDown={handleMouseDown}
+                                    onMouseMove={handleMouseMove}
+                                    onMouseUp={handleMouseUp}
+                                    style={{display: "block"}}
+                                />
+                            </div>
                         </div>
                     </div>
                 );
