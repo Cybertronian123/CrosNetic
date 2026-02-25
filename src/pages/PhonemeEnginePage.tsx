@@ -71,7 +71,7 @@ export default function PhonemeEnginePage() {
             />
 
             {/* Timeline */}
-            <TimelineCanvas lanes={lanes} />
+            <TimelineCanvas lanes={lanes} setLanes={setLanes}/>
         </div>
     );
 }
