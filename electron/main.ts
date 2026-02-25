@@ -19,7 +19,10 @@ function createWindow() {
         }
     });
 
+
     mainWindow.loadURL("http://localhost:5173");
+    mainWindow.webContents.setZoomFactor(1);
+    mainWindow.webContents.setVisualZoomLevelLimits(1, 1);
 }
 
 app.whenReady().then(createWindow);

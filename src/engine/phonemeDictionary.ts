@@ -27,6 +27,7 @@ export const PHONEMES: PhonemeDef[] = [
     { symbol: "gh", bengali: "ঘ", type: "consonant" },
     { symbol: "ng", bengali: "ঙ", type: "consonant" },
     { symbol: "ch", bengali: "চ", type: "consonant" },
+    { symbol: "j", bengali: "জ", type: "consonant" },
     { symbol: "jh", bengali: "ঝ", type: "consonant" },
     { symbol: "t", bengali: "ত", type: "consonant" },
     { symbol: "th", bengali: "থ", type: "consonant" },

@@ -1,38 +1,77 @@
 import { useState } from "react";
-import TimelineCanvas from "../components/TimelineCanvas";
 import { parseRomanized, parseBengali } from "../engine/phonemeParser";
+import TimelineCanvas from "../components/TimelineCanvas";
+import LaneControls from "../components/LaneControls";
+import type { Lane } from "../models/Lane";
 
 export default function PhonemeEnginePage() {
 
     const [input, setInput] = useState("");
     const [mode, setMode] = useState<"roman" | "bengali">("roman");
-    const [phonemes, setPhonemes] = useState<any[]>([]);
+    const [selectedLaneId, setSelectedLaneId] = useState("lane_1");
+
+    const [lanes, setLanes] = useState<Lane[]>([
+        {
+            id: "lane_1",
+            name: "Lead",
+            muted: false,
+            solo: false,
+            volume: 1,
+            phonemes: []
+        }
+    ]);
 
     const handleParse = () => {
+
         const parsed =
             mode === "roman"
                 ? parseRomanized(input)
                 : parseBengali(input);
 
-        setPhonemes(parsed);
+        setLanes(prev =>
+            prev.map(l =>
+                l.id === selectedLaneId
+                    ? { ...l, phonemes: parsed }
+                    : l
+            )
+        );
     };
 
     return (
-        <div style={{ background:"#121212", height:"100vh", color:"#fff" }}>
+        <div style={{
+            background:"#121212",
+            height:"100vh",
+            display:"flex",
+            flexDirection:"column",
+            color:"#fff"
+        }}>
 
-            <div style={{ padding:20 }}>
+            {/* Top Input Bar */}
+            <div style={{ padding:20, display:"flex", gap:10 }}>
+
         <textarea
             value={input}
             onChange={e=>setInput(e.target.value)}
-            style={{ width:"400px", height:"100px" }}
+            style={{ width:400, height:100 }}
         />
 
-                <button onClick={()=>setMode("roman")}>Roman</button>
-                <button onClick={()=>setMode("bengali")}>Bengali</button>
-                <button onClick={handleParse}>Parse</button>
+                <div style={{ display:"flex", flexDirection:"column", gap:6 }}>
+                    <button onClick={()=>setMode("roman")}>Roman</button>
+                    <button onClick={()=>setMode("bengali")}>Bengali</button>
+                    <button onClick={handleParse}>Parse</button>
+                </div>
             </div>
 
-            <TimelineCanvas phonemes={phonemes}/>
+            {/* Lane Controls */}
+            <LaneControls
+                lanes={lanes}
+                setLanes={setLanes}
+                selectedLaneId={selectedLaneId}
+                setSelectedLaneId={setSelectedLaneId}
+            />
+
+            {/* Timeline */}
+            <TimelineCanvas lanes={lanes} />
         </div>
     );
 }
