@@ -2,6 +2,7 @@ import React, { useRef, useEffect, useState } from "react";
 import type { Lane } from "../models/Lane";
 import LanePianoRoll from './LanePianoRoll.tsx';
 import LaneList from './LaneList';
+import { NOTE_HEIGHT, MIN_MIDI, MAX_MIDI } from "../engine/pianoConfig";
 
 interface Props {
     lanes: Lane[];
@@ -10,8 +11,8 @@ interface Props {
 
 
 const LANE_HEIGHT = 300;
-const MIN_SCALE = 50;
-const MAX_SCALE = 1000;
+// const MIN_SCALE = 50;
+// const MAX_SCALE = 1000;
 
 const SNAP_DIVISION = 0.25; // 250ms grid
 const SNAP_PIXELS = 8;
@@ -24,6 +25,17 @@ export default function TimelineCanvas({ lanes, setLanes }: Props) {
     const containerRef = useRef<HTMLDivElement>(null);
 
     const [isCtrlPressed, setIsCtrlPressed] = useState(false);
+
+    const midiToY = (midi: number) => {
+        const clamped = Math.max(MIN_MIDI, Math.min(MAX_MIDI, midi));
+        return (MAX_MIDI - clamped) * NOTE_HEIGHT;
+    };
+
+    const yToMidi = (y: number) => {
+        const midi =
+            MAX_MIDI - Math.round(y / NOTE_HEIGHT);
+        return Math.max(MIN_MIDI, Math.min(MAX_MIDI, midi));
+    };
 
     useEffect(() => {
 
@@ -135,6 +147,8 @@ export default function TimelineCanvas({ lanes, setLanes }: Props) {
         startMouseX: number;
         originalStart: number;
         originalDuration: number;
+        startMouseY: number;
+        originalPitch: number;
     } | null>(null);
 
     const RESIZE_MARGIN = 6;
@@ -177,7 +191,9 @@ export default function TimelineCanvas({ lanes, setLanes }: Props) {
                     phonemeId: ph.id,
                     startMouseX: x,
                     originalStart: ph.start,
-                    originalDuration: ph.duration
+                    originalDuration: ph.duration,
+                    startMouseY: y,
+                    originalPitch: ph.pitch,
                 });
 
                 return;
@@ -209,6 +225,7 @@ export default function TimelineCanvas({ lanes, setLanes }: Props) {
                         // -------- MOVE --------
                         if (dragState.type === "move") {
 
+                            // -------- Horizontal movement --------
                             let newStart =
                                 dragState.originalStart + deltaTime;
 
@@ -223,10 +240,31 @@ export default function TimelineCanvas({ lanes, setLanes }: Props) {
                                 ph.id
                             );
 
+                            // -------- Vertical movement --------
+                            const rect = canvasRef.current!.getBoundingClientRect();
+                            const mouseY = e.clientY - rect.top;
+
+                            const deltaY = mouseY - dragState.startMouseY;
+
+                            let newPitch;
+
+                            if (!isCtrlPressed) {
+                                // Snap to note rows
+                                const deltaMidi = Math.round(deltaY / NOTE_HEIGHT);
+                                newPitch = dragState.originalPitch - deltaMidi;
+                            } else {
+                                // Fine pitch (no snap)
+                                const deltaMidi = deltaY / NOTE_HEIGHT;
+                                newPitch = dragState.originalPitch - deltaMidi;
+                            }
+
+                            newPitch = clampMidi(Math.round(newPitch));
+
                             return {
                                 ...ph,
                                 start: clamped.start,
-                                duration: clamped.duration
+                                duration: clamped.duration,
+                                pitch: newPitch
                             };
                         }
 
@@ -388,11 +426,13 @@ export default function TimelineCanvas({ lanes, setLanes }: Props) {
                         ? "#00d4ff"
                         : "#ff7a00";
 
+                const noteY = midiToY(ph.pitch);
+
                 ctx.fillRect(
                     x,
-                    yOffset + 30,
+                    yOffset + noteY,
                     w,
-                    40
+                    NOTE_HEIGHT
                 );
 
                 ctx.fillStyle = "#000";

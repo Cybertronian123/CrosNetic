@@ -23,7 +23,7 @@ function createPhoneme(symbol: string, type: string): ParsedPhoneme {
         type,
         start: counter * 0.3,
         duration: 0.3,
-        pitch: 220,
+        pitch: 60, //MIDI Default (C4)
         power: 1
     };
 }
