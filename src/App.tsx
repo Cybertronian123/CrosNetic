@@ -1,12 +1,10 @@
-import './App.css'
-import PhonemeEnginePage from "./pages/PhonemeEnginePage.tsx";
+import { Editor } from "./editor/Editor";
+import { EditorStoreProvider } from "./state";
 
-function App() {
-
-
+export default function App() {
   return (
-    <PhonemeEnginePage />
-  )
+    <EditorStoreProvider>
+      <Editor />
+    </EditorStoreProvider>
+  );
 }
-
-export default App
